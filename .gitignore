@@ -1,0 +1,7 @@
+old/
+uploaderendpoints.js
+liveconfig.js
+secrets.dev.yml
+secrets.prod.yml
+node_modules
+.serverless

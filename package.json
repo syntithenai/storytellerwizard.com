@@ -1,0 +1,32 @@
+{
+  "name": "storytellerwizard.com",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "aws-sdk": "^2.509.0",
+    "bluebird": "^3.5.5",
+    "express": "^4.17.1",
+    "fullstack-serverless": "^0.6.1",
+    "mongoose": "^5.6.9",
+    "mustache": "^3.0.1",
+    "node-fetch": "^2.6.0",
+    "nodemailer": "^6.3.0",
+    "papaparse": "^5.0.2",
+    "request": "^2.88.0",
+    "serverless-http": "^2.0.2",
+    "serverless-offline": "^5.10.1",
+    "serverless-secrets-plugin": "^0.1.0",
+    "simple-get": "^3.0.3",
+    "validator": "^11.1.0"
+  },
+  "scripts": {
+    "start": "concurrently --kill-others-on-fail  \"npm run server\" \"npm run client\" ",
+    "server": "sls offline --port 4000",
+    "client": "cd client && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^4.1.1",
+    "serverless-cloudfront-distribution-certificate": "0.0.6",
+    "serverless-s3-sync": "^1.8.0"
+  }
+}
