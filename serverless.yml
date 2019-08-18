@@ -1,27 +1,105 @@
+# https://www.serverlessops.io/blog/static-websites-on-aws-s3-with-serverless-framework
+service: storytellerwizard
 org: syntithenai
 app: storyteller
-# https://www.serverlessops.io/blog/static-websites-on-aws-s3-with-serverless-framework
 
-service: storyteller
+# for development
+#REACT_APP_IDENTITY_POOL_ID=us-west-2:45db8ed6-22c8-4427-a288-f4f008b9aa47  REACT_APP_AUTH_DOMAIN=storytellerwizard.auth.us-west-2.amazoncognito.com REACT_APP_CLIENT_ID=74fs9u8kovst7215k30a661blv  REACT_APP_CLIENT_SECRET=1bj35lkuhg7gqbu1qv6t3l3771lvm5v5eg4aas6qq566n72brva0 REACT_APP_REDIRECT_URL=http://localhost:300 REACT_APP_REGION=us-west-2 npm start
+
+custom:
+  
+  # CUSTOMISE ME
+  
+  servicename: storytellerwizard
+  region: us-west-2
+  stage: prod
+  fromEmail: syntithenai@gmail.com
+  websiteDomain: storytellerwizard.com
+  redirectUrl_live: https://${self:custom.websiteDomain}
+  redirectUrl_dev: http://localhost:3000
+  authDomain: storytellerwizard.auth.us-west-2.amazoncognito.com
+  certificate: arn:aws:acm:us-east-1:462798946277:certificate/ab1bd706-d7ab-42b7-b3f0-50644cd88f4d
+  cognitoPoolId:  us-west-2:45db8ed6-22c8-4427-a288-f4f008b9aa47
+  cognitoUserPoolArn: arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_xCNiLG8vF
+  #######################
+
+  dynamodb:
+   stages:
+      - dev
+      - prod
+   start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    #migration:
+      #dir: offline/migrations
+
+  AuthName: ${self:custom.servicename}auth
+  authUrl: https://${self:custom.authDomain}  
+  #us-west-2:220f37d7-abc7-4e88-bc0e-75cf862a8c0f
+  #cognitoPoolId: ${cf:${self:custom.AuthName}.Id}
+  #!Ref IdentityPool::Id    
+  secrets: ${file(secrets.${opt:stage, self:provider.stage}.yml)}
+  fullstack:
+    domain: 
+      - ${self:custom.websiteDomain}   
+      - www.${self:custom.websiteDomain}
+    bucketName: fullstack${self:custom.servicename}
+    certificate: ${self:custom.certificate}
+    clientCommand: echo "REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region}" > /tmp/.env-dev;  REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_live} REACT_APP_REGION=${self:custom.region} npm run build
+    clientSrcPath: client
+    apiPath: api
+    distributionFolder: client/build
+    
+  #cfdDomain:
+    #domainNames:
+      #- storytellerwizard.com
+      #- www.storytellerwizard.com
+      #- auth.storytellerwizard.com
+    #cloudFront: CloudFrontDistribution
+    #retries: 15
+    #minimumProtocolVersion: TLSv1.2_2018
+
+
+plugins:
+#  - serverless-s3-sync
+  - fullstack-serverless
+  - serverless-secrets-plugin
+  - serverless-dynamodb-local
+  - serverless-offline
 
 package:
   exclude:
     - client/**
+    - old/**
+
 
 provider:
   name: aws
   runtime: nodejs10.x
-  region: us-west-2  
-  stage: prod
+  region: ${self:custom.region}  
+  stage: ${self:custom.stage}
   environment:
     MONGODB: ${self:custom.secrets.MONGODB}
     fromEmail: ${self:custom.fromEmail}
-    websiteUrl: ${self:custom.websiteUrl}
+    websiteUrl: https://${self:custom.websiteDomain}
+    authUrl: ${self:custom.authUrl}
+    authClientId: ${self:custom.secrets.clientId}
+    authClientSecret: ${self:custom.secrets.clientSecret}
+    cognitoPoolId: ${self:custom.cognitoPoolId}
     importSheets_0: ${self:custom.secrets.importSheets.0}
     importSheets_1: ${self:custom.secrets.importSheets.1}
     importSheets_2: ${self:custom.secrets.importSheets.2}
     importMultipleChoice_0: ${self:custom.secrets.importMultipleChoice.0} 
     importMultipleChoice_1: ${self:custom.secrets.importMultipleChoice.1} 
+    REACT_APP_IDENTITY_POOL_ID: ${self:custom.cognitoPoolId}
+    REACT_APP_AUTH_DOMAIN: ${self:custom.authDomain}
+    REACT_APP_CLIENT_ID: ${self:custom.secrets.clientId}
+    REACT_APP_CLIENT_SECRET: ${self:custom.secrets.clientSecret}
+    REACT_APP_REDIRECT_URL: ${self:custom.redirectUrl_live}
+    REACT_APP_REGION: ${self:custom.region}
+    
+    
     
   iamRoleStatements:
     - Effect: "Allow"
@@ -34,43 +112,14 @@ provider:
           ses:FromAddress:
             - ${self:custom.fromEmail}
 
-plugins:
-#  - serverless-s3-sync
-  - fullstack-serverless
-  - serverless-offline
-  - serverless-secrets-plugin
-  
-custom:
-  fromEmail: syntithenai@gmail.com
-  websiteUrl: http://localhost:3000
-  AuthName: storytellerwizard_auth
-  secrets: ${file(secrets.${opt:stage, self:provider.stage}.yml)}
-  fullstack:
-    domain: 
-      - storytellerwizard.com   
-      - www.storytellerwizard.com
-    bucketName: fullstackstorytellerwizard
-    certificate: arn:aws:acm:us-east-1:462798946277:certificate/ab1bd706-d7ab-42b7-b3f0-50644cd88f4d
-    clientCommand: npm run build
-    clientSrcPath: client
-    apiPath: api
-    distributionFolder: client/build
-    
-  cfdDomain:
-    domainNames:
-      - storytellerwizard.com
-      - www.storytellerwizard.com
-      - auth.storytellerwizard.com
-    cloudFront: CloudFrontDistribution
-    retries: 15
-    minimumProtocolVersion: TLSv1.2_2018
 
 functions:
   message:
     handler: api/api.handler
     timeout: 30
-    #authorizer:
-      #arn:  arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_3QA8tlaSF 
+    authorizer:
+      arn: ${self:custom.cognitoUserPoolArn}  
+      #arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_3QA8tlaSF 
     events:
       - http:
           path: ${self:custom.fullstack.apiPath}/{proxy+}
@@ -131,7 +180,7 @@ resources:
         Schema:
           - Name: email
             AttributeDataType: String
-            Mutable: false
+            Mutable: true
             Required: true
           - Name: slackId
             AttributeDataType: String
@@ -149,11 +198,13 @@ resources:
           - email
           - openid 
         CallbackURLs: 
-          - ${self:custom.websiteUrl}
-        DefaultRedirectURI: ${self:custom.websiteUrl}
+          - ${self:custom.redirectUrl_live}
+          - ${self:custom.redirectUrl_dev}
+        DefaultRedirectURI: ${self:custom.redirectUrl_live}
         GenerateSecret: true
         LogoutURLs: 
-          - ${self:custom.websiteUrl}
+          - ${self:custom.redirectUrl_live}
+          - ${self:custom.redirectUrl_dev}
         RefreshTokenValidity: 3650
         SupportedIdentityProviders: 
           - COGNITO
