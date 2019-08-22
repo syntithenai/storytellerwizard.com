@@ -1,3 +1,5 @@
+// https://github.com/odysseyscience/react-s3-uploader
+
  var uuidv4 = require('uuidv4'),
      aws = require('aws-sdk'),
      express = require('express');

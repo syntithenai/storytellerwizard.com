@@ -48,6 +48,16 @@ function initRoutes(router,initdb) {
 					res.send(result);
 				});
 			})
+		} else if (req.body.questions && req.body.questions.length > 0) {
+			let questionIds = req.body.questions.split(",").map(function(qid) {return ObjectId(qid)});
+			let promises=[];
+			initdb().then(function(db) {
+				db.collection('mnemonics').find({question: {$in:questionIds}}).toArray(function(err, result) {
+					//result.map(function(key,mnemonic));
+		//            //console.log(['mnemonics found',result]);
+					res.send(result);
+				});
+			})
 		} else {
 			res.send({message:'Invalid request'});
 		}

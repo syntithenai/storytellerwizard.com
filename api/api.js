@@ -110,7 +110,7 @@ function initdb() {
 		console.log('FINALLY DB DONE')
 		if (databaseConnection) {
 			console.log('FINALLY DB closed')
-			databaseConnection.close()
+			if (databaseConnection && databaseConnection.close) databaseConnection.close()
 		}
 	});
 }
@@ -1558,23 +1558,56 @@ var initAuthRoutes = require('./api_auth')
 			let user = req.body.user;
 			let questions = req.body.questions;
 			let ts = new Date().getTime();
+			let seenRecords=[];
 			questions.map(function(question) {
+				seenRecords.push({user:ObjectId(user),question:ObjectId(question),timestamp:ts})
+			})
 				//console.log('insert seen record for question '+question);
-				initdb().then(function(db) {
-					db.collection('seen').insert({user:ObjectId(user),question:ObjectId(question),timestamp:ts}).then(function(inserted) {
-				  //      //console.log(['seen inserted']);
-						// collate tally of all seen, calculate success percentage to successScore
+			initdb().then(function(db) {
+				db.collection('seen').insertMany(seenRecords).then(function(inserted) {
+			  //      //console.log(['seen inserted']);
+					// collate tally of all seen, calculate success percentage to successScore
+					questions.map(function(question) {
 						updateQuestionTallies(user,question);
-						res.send({message:'Sent all questions for review'});
-					}).catch(function(e) {
-						res.send({error:e});
-					});
-				})
+					})
+					res.send({message:'Sent all questions for review'});
+				}).catch(function(e) {
+					res.send({error:e});
+				});
 			})
 		} else {
 			res.send({error:'Invalid request'});
 		}
 	})
+	
+	router.post('/markallreviewed', (req, res) => {
+		if (req.body.user && req.body.user.length > 0 && req.body.questions && req.body.questions.length > 0 ) {
+		  //  console.log(['sendallquestionsforreview',req.body.user,JSON.stringify(req.body.questions)]);
+			let user = req.body.user;
+			let questions = req.body.questions;
+			let ts = new Date().getTime();
+			let seenRecords=[];
+			questions.map(function(question) {
+				seenRecords.push({user:ObjectId(user),question:ObjectId(question),timestamp:ts})
+			})
+				//console.log('insert seen record for question '+question);
+			initdb().then(function(db) {
+				db.collection('successes').insertMany(seenRecords).then(function(inserted) {
+			  //      //console.log(['seen inserted']);
+					// collate tally of all seen, calculate success percentage to successScore
+					questions.map(function(question) {
+						updateQuestionTallies(user,question);
+					})
+					res.send({message:'Sent all questions for review'});
+				}).catch(function(e) {
+					res.send({error:e});
+				});
+			})
+		} else {
+			res.send({error:'Invalid request'});
+		}
+	})
+	
 
 	router.post('/seen', (req, res) => {
 		////console.log(['seen',req.body]);
@@ -1795,7 +1828,33 @@ var initAuthRoutes = require('./api_auth')
 		})
 
 	})
+
+
+// UPLOADER ROUTES
+	
+	router.get('/proxy', (req, res) => {
+		if (req.query.url) {
+			var request = require('request');
+			request.get(req.query.url).pipe(res);
+		}
+	});
+
+	router.use('/s3', require('./s3router')({
+		bucket: process.env.REACT_APP_S3_BUCKET,
+		region: process.env.REACT_APP_REGION, //optional
+		//signatureVersion: 'v4', //optional (use for some amazon regions: frankfurt and others)
+		headers: {'Access-Control-Allow-Origin': '*'}, // optional
+		ACL: 'public-read', // this is default
+		uniquePrefix: false // (4.0.2 and above) default is true, setting the attribute to false preserves the original filename in S3
+	}));
+
+	//var mongo_express = require('mongo-express/lib/middleware')
+	//var mongo_express_config = require('./mongo_express_config')
+	//router.use('/mongo_express', mongo_express(mongo_express_config))
+
 //});
+
+
 
 app.use('/api',router)
 

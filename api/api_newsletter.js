@@ -86,34 +86,34 @@ function initRoutes(router,db) {
 	function sendNewsletterTo(newsletter,user) {
 		console.log(['SEND NEWSLETTER TO ',user,newsletter])
 		let p = new Promise(function(resolve,reject) {
-			var params={
-				username: user.username,
-				password: user.password,
-				'grant_type':'password',
-				'client_id':config.clientId,
-				'client_secret':config.clientSecret
-			};
-			fetch("http://localhost:3000/oauth/token", {
-			  method: 'POST',
-			  headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			  },
+			//var params={
+				//username: user.username,
+				//password: user.password,
+				//'grant_type':'password',
+				//'client_id':config.clientId,
+				//'client_secret':config.clientSecret
+			//};
+			//fetch("http://localhost:3000/oauth/token", {
+			  //method: 'POST',
+			  //headers: {
+				//'Content-Type': 'application/x-www-form-urlencoded',
+			  //},
 			  
-			  body: Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&')
-			}).then(function(response) {
-				return response.json();
-			}).then(function(token) {
-				let html = generateNewsletter(newsletter.content,user,token.access_token);
+			  //body: Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&')
+			//}).then(function(response) {
+				//return response.json();
+			//}).then(function(token) {
+				let html = generateNewsletter(newsletter.content,user,'') //,token.access_token);
 				utils.sendMail(process.env.fromEmail,user.username,"Mnemo's Library Newsletter",html).then(function(mailFeedback) {
 					resolve({ok:true,message:'Sent email to '+user.username,mailFeedback:mailFeedback })
 				}).catch(function(e) {
 					reject({error:e})
 				})
 
-			}).catch(function(e) {
-			   console.log(e);
-			   reject({error:e});
-			});
+			//}).catch(function(e) {
+			   //console.log(e);
+			   //reject({error:e});
+			//});
 		});
 		return p		
 
@@ -134,37 +134,37 @@ function initRoutes(router,db) {
 						if (req.body.content && req.body.content.length > 0) {
 						//	console.log(['publish is test',	req.body.userEmail])
 							// get auth key
-							var params={
-								username: user.username,
-								password: user.password,
-								'grant_type':'password',
-								'client_id':config.clientId,
-								'client_secret':config.clientSecret
-							};
-							if (req.body.userEmail && req.body.userEmail.length > 0) {
-								fetch("http://localhost:3000/oauth/token", {
-								  method: 'POST',
-								  headers: {
-									'Content-Type': 'application/x-www-form-urlencoded',
-									//Authorization: 'Basic '+btoa(config.clientId+":"+config.clientSecret) 
-								  },
+							//var params={
+								//username: user.username,
+								//password: user.password,
+								//'grant_type':'password',
+								//'client_id':config.clientId,
+								//'client_secret':config.clientSecret
+							//};
+							//if (req.body.userEmail && req.body.userEmail.length > 0) {
+								//fetch("http://localhost:3000/oauth/token", {
+								  //method: 'POST',
+								  //headers: {
+									//'Content-Type': 'application/x-www-form-urlencoded',
+									////Authorization: 'Basic '+btoa(config.clientId+":"+config.clientSecret) 
+								  //},
 								  
-								  body: Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&')
-								}).then(function(response) {
-									return response.json();
-								}).then(function(token) {
-									let html = generateNewsletter(req.body.content,user,token.access_token);
+								  //body: Object.keys(params).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&')
+								//}).then(function(response) {
+									//return response.json();
+								//}).then(function(token) {
+									let html = generateNewsletter(req.body.content,user,'') //token.access_token);
 									utils.sendMail(process.env.fromEmail,req.body.userEmail,"Mnemo's Library Newsletter",html).then(function() {
 										res.send({ok:true,message:'Sent test email to '+req.body.userEmail })
 									}).catch(function(e) {
 										res.send({error:e})
 									})
 
-								}).catch(function(e) {
-								   console.log(e);
-								   res.send({error:e});
-								});
-							}
+								//}).catch(function(e) {
+								   //console.log(e);
+								   //res.send({error:e});
+								//});
+							//}
 						} else {
 							res.send({error:'No message content'});
 						}

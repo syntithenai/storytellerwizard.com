@@ -7,7 +7,7 @@ const get = require('simple-get');
 
 
 
-function initRoutes(router,db) {
+function initRoutes(router,initdb) {
 	
 
 	function updateTags(tags) {

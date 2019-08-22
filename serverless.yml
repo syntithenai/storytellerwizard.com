@@ -12,15 +12,24 @@ custom:
   
   servicename: storytellerwizard
   region: us-west-2
-  stage: prod
+  stage: dev
   fromEmail: syntithenai@gmail.com
   websiteDomain: storytellerwizard.com
   redirectUrl_live: https://${self:custom.websiteDomain}
   redirectUrl_dev: http://localhost:3000
   authDomain: storytellerwizard.auth.us-west-2.amazoncognito.com
   certificate: arn:aws:acm:us-east-1:462798946277:certificate/ab1bd706-d7ab-42b7-b3f0-50644cd88f4d
-  cognitoPoolId:  us-west-2:45db8ed6-22c8-4427-a288-f4f008b9aa47
-  cognitoUserPoolArn: arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_xCNiLG8vF
+  #  
+  cognitoPoolId: none 
+  #!GetAtt UserPool.id 
+  #!Ref IdentityPool::Id
+  # !GetAtt UserPool.id
+  # orig  
+  #us-west-2:45db8ed6-22c8-4427-a288-f4f008b9aa47
+  # 
+  cognitoUserPoolArn: none
+  #!GetAtt IdentityPool.arn
+  # arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_xCNiLG8vF
   #######################
 
   dynamodb:
@@ -31,8 +40,8 @@ custom:
       port: 8000
       inMemory: true
       migrate: true
-    #migration:
-      #dir: offline/migrations
+      #migration:
+        #dir: api/offline/migrations
 
   AuthName: ${self:custom.servicename}auth
   authUrl: https://${self:custom.authDomain}  
@@ -46,7 +55,8 @@ custom:
       - www.${self:custom.websiteDomain}
     bucketName: fullstack${self:custom.servicename}
     certificate: ${self:custom.certificate}
-    clientCommand: echo "REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region}" > /tmp/.env-dev;  REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_live} REACT_APP_REGION=${self:custom.region} npm run build
+    clientCommand: echo "REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region}" > /tmp/.env-dev;  REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region} REACT_APP_S3_BUCKET=${self:custom.websiteDomain} npm run build
+    
     clientSrcPath: client
     apiPath: api
     distributionFolder: client/build
@@ -86,7 +96,7 @@ provider:
     authUrl: ${self:custom.authUrl}
     authClientId: ${self:custom.secrets.clientId}
     authClientSecret: ${self:custom.secrets.clientSecret}
-    cognitoPoolId: ${self:custom.cognitoPoolId}
+   # cognitoPoolId: ${self:custom.cognitoPoolId}
     importSheets_0: ${self:custom.secrets.importSheets.0}
     importSheets_1: ${self:custom.secrets.importSheets.1}
     importSheets_2: ${self:custom.secrets.importSheets.2}
@@ -98,8 +108,7 @@ provider:
     REACT_APP_CLIENT_SECRET: ${self:custom.secrets.clientSecret}
     REACT_APP_REDIRECT_URL: ${self:custom.redirectUrl_live}
     REACT_APP_REGION: ${self:custom.region}
-    
-    
+    REACT_APP_S3_BUCKET: ${self:custom.websiteDomain}_files
     
   iamRoleStatements:
     - Effect: "Allow"
@@ -107,11 +116,11 @@ provider:
         - "ses:SendEmail"
       Resource:
         - "*"
-      Condition:
-        StringEquals:
-          ses:FromAddress:
-            - ${self:custom.fromEmail}
-
+      #Condition:
+        #StringEquals:
+          #ses:FromAddress:
+            #- ${self:custom.fromEmail}
+   
 
 functions:
   message:
@@ -124,24 +133,8 @@ functions:
       - http:
           path: ${self:custom.fullstack.apiPath}/{proxy+}
           method: ANY
-      
-
-#custom:
-  #siteName: storytellerwizard.com
-  #hostedZoneName: ${self:custom.siteName}
-  #aliasHostedZoneId: Z3BJ6K6RIION7M
-  #aliasDNSName: s3-website-us-west-2.amazonaws.com
-  #s3Sync:
-    #- bucketName: ${self:custom.siteName}
-      #localDir: static
-
-  ##apiCloudFront:
-    ##fullDomainName:  ${self:custom.siteName}
-    ##certificate: arn:aws:acm:us-east-1:462798946277:certificate/ab1bd706-d7ab-42b7-b3f0-50644cd88f4d
-      
-
-resources:
-  Resources:
+  
+  
   # Creates a role that allows Cognito to send SNS messages
     SNSRole:
       Type: "AWS::IAM::Role"
@@ -182,7 +175,7 @@ resources:
             AttributeDataType: String
             Mutable: true
             Required: true
-          - Name: slackId
+          - Name: name
             AttributeDataType: String
             Mutable: true
   # Creates a User Pool Client to be used by the identity pool
