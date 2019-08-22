@@ -32,16 +32,16 @@ custom:
   # arn:aws:cognito-idp:us-west-2:462798946277:userpool/us-west-2_xCNiLG8vF
   #######################
 
-  dynamodb:
-   stages:
-      - dev
-      - prod
-   start:
-      port: 8000
-      inMemory: true
-      migrate: true
-      #migration:
-        #dir: api/offline/migrations
+  #dynamodb:
+   #stages:
+      #- dev
+      #- prod
+   #start:
+      #port: 8000
+      #inMemory: true
+      #migrate: true
+      ##migration:
+        ##dir: api/offline/migrations
 
   AuthName: ${self:custom.servicename}auth
   authUrl: https://${self:custom.authDomain}  
@@ -75,7 +75,7 @@ plugins:
 #  - serverless-s3-sync
   - fullstack-serverless
   - serverless-secrets-plugin
-  - serverless-dynamodb-local
+#  - serverless-dynamodb-local
   - serverless-offline
 
 package:
@@ -133,8 +133,9 @@ functions:
       - http:
           path: ${self:custom.fullstack.apiPath}/{proxy+}
           method: ANY
-  
-  
+
+resources:  
+  Resources: 
   # Creates a role that allows Cognito to send SNS messages
     SNSRole:
       Type: "AWS::IAM::Role"
