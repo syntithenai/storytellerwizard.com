@@ -16,15 +16,15 @@ const express = require('express')
 const bodyParser= require('body-parser')
 const app = express()
 
-
-
 const jwt = require('jsonwebtoken');
 
 // body parser doesn't seem to work with serverless-http ??
 // this method requires that all POST submissions are application/json encoded
 app.use(function(req,res,next) {
-	console.log('PRE')
-	console.log(req.headers.authorization);
+
+	//console.log('PRE')
+	//console.log(process.env)
+	//console.log(req.headers.authorization);
 	
 	// extract email address from auth header and set req.user.email
 	let token = req.headers.authorization ? req.headers.authorization : ((req.query && req.query.id_token) ? req.query.id_token : null)
@@ -94,19 +94,27 @@ function dbConnectAndExecute(dbUrl, fn) {
   return dbExecute(mongoose.connect(dbUrl,{}), fn);
 }
 
+var databaseConnection = null;
 
 function initdb() {
-	var databaseConnection = null;
 	return new Promise(function(resolve,reject) {
-		MongoClient.connect(mongoString, (err, client) => {
-		  if (err) {
-			  console.log(err)
-			  return //
-		  }
-		  databaseConnection = client.db() 
-		  resolve(databaseConnection);
-		})
-	}).finally(function() {
+		console.log([databaseConnection])
+		if (databaseConnection !== null && databaseConnection.serverConfig.isConnected()) {
+			console.log('ALREADY CONNECTED')
+			resolve(databaseConnection)
+		} else {
+			console.log([' CONNEXM',mongoString])
+			MongoClient.connect(mongoString, (err, client) => {
+			  if (err) {
+				  console.log(err)
+				  return //
+			  }
+			  databaseConnection = client.db() 
+			  resolve(databaseConnection);
+			})
+		}
+	})
+	.finally(function() {
 		console.log('FINALLY DB DONE')
 		if (databaseConnection) {
 			console.log('FINALLY DB closed')
@@ -136,6 +144,7 @@ var initAuthRoutes = require('./api_auth')
 	initNewsletterRoutes(router,initdb);
 	initAuthRoutes(router,initdb)
 	
+
 	router.get('/guid', (req, res) => {
 		console.log(['guid',req.query.guid]);
 				

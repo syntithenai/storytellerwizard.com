@@ -6,3 +6,4 @@ secrets.dev.yml
 secrets.prod.yml
 node_modules
 .serverless
+.env
