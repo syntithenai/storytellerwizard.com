@@ -1027,14 +1027,24 @@ var initAuthRoutes = require('./api_auth')
 				criteria.push({$or:[
 					 {$and:[{seen:{$lt:oneHourBack}},{successTally:{$eq:1}}]},
 					 {$and:[{seen:{$lt:oneHourBack}},{successTally:{$eq:2}}]},
-					 {$and:[{seen:{$lt:oneDayBack}},{successTally:{$eq:3}}]},
-					 {$and:[{seen:{$lt:oneWeekBack}},{successTally:{$eq:4}}]},
-					 {$and:[{seen:{$lt:twoWeeksBack}},{successTally:{$eq:5}}]},
-					 {$and:[{seen:{$lt:oneMonthBack}},{successTally:{$eq:6}}]},
-					 {$and:[{seen:{$lt:twoMonthBack}},{successTally:{$eq:7}}]},
+					 {$and:[{seen:{$lt:(8*oneHourBack)}},{successTally:{$eq:3}}]},
+					 {$and:[{seen:{$lt:(27*oneHourBack)}},{successTally:{$eq:4}}]},
+					 {$and:[{seen:{$lt:(64*oneHourBack)}},{successTally:{$eq:5}}]},
+					 {$and:[{seen:{$lt:(125*oneHourBack)}},{successTally:{$eq:6}}]},
+					 {$and:[{seen:{$lt:(216*oneHourBack)}},{successTally:{$eq:7}}]},
+					 {$and:[{seen:{$lt:(343*oneHourBack)}},{successTally:{$eq:8}}]},
+					 {$and:[{seen:{$lt:(512*oneHourBack)}},{successTally:{$eq:9}}]},
+					 {$and:[{seen:{$lt:(729*oneHourBack)}},{successTally:{$eq:10}}]},
+					 {$and:[{seen:{$lt:(1000*oneHourBack)}},{successTally:{$eq:11}}]},
+					 {$and:[{seen:{$lt:(1331*oneHourBack)}},{successTally:{$eq:12}}]},
+					 {$and:[{seen:{$lt:(1728*oneHourBack)}},{successTally:{$eq:13}}]},
+					 {$and:[{seen:{$lt:(2197*oneHourBack)}},{successTally:{$eq:14}}]},
+					 {$and:[{seen:{$lt:(2744*oneHourBack)}},{successTally:{$eq:15}}]},
+					 {$and:[{seen:{$lt:(3375*oneHourBack)}},{successTally:{$eq:16}}]},
 					 {successTally:{$not:{$gt:0}}}
 				]});    
 			 //}
+			 
 			 //else {
 			
 			criteria.push({$or:[{block :{$lte:0}},{block :{$exists:false}}]});
@@ -1047,7 +1057,7 @@ var initAuthRoutes = require('./api_auth')
 			 if (req.query.user && req.query.user.length > 0) {
 				 // sort by successTally and then most recently seen first
 					console.log(JSON.stringify(criteria));
-				db.collection('userquestionprogress').find({$and:criteria}).sort({'successTally':1,'seen':1}).limit(limit).toArray().then(function(questions,error) {
+				db.collection('userquestionprogress').find({$and:criteria}).sort({'successTally':1,'seen':-1}).limit(limit).toArray().then(function(questions,error) {
 					////console.log('llll');
 					////console.log(questions);
 					////console.log(error);

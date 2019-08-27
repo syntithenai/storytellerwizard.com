@@ -117,7 +117,7 @@ function initRoutes(router,initdb) {
 							console.log('FIND')
 							console.log(emailDirect);
 				
-					db.collection('users').findOne({email:emailDirect}).then(function(user) {
+					db.collection('users').findOne({username:emailDirect}).then(function(user) {
 						if (user && user._id) {
 							console.log('found')
 							console.log(user);
