@@ -66,7 +66,8 @@ custom:
       - www.${self:custom.websiteDomain}
     bucketName: fullstack${self:custom.servicename}
     certificate: ${self:custom.certificate}
-    clientCommand: echo "REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPooin?response_type=token&client_id=7fre9b3lk8h2vji3db5d3q5i9r&redirect_uri=http://localhost:3000lId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region} REACT_APP_S3_BUCKET=${self:custom.websiteDomain}-${self:custom.stage}-files " > ./.env; REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_live} REACT_APP_REGION=${self:custom.region} REACT_APP_S3_BUCKET=${self:custom.websiteDomain}=${self:custom.stage}-files npm run build
+    #echo "REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPooin?response_type=token&client_id=7fre9b3lk8h2vji3db5d3q5i9r&redirect_uri=http://localhost:3000lId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_dev} REACT_APP_REGION=${self:custom.region} REACT_APP_S3_BUCKET=${self:custom.websiteDomain}-${self:custom.stage}-files " > ./.env;
+    clientCommand:  REACT_APP_IDENTITY_POOL_ID=${self:custom.cognitoPoolId}  REACT_APP_AUTH_DOMAIN=${self:custom.authDomain} REACT_APP_CLIENT_ID=${self:custom.secrets.clientId} REACT_APP_CLIENT_SECRET=${self:custom.secrets.clientSecret} REACT_APP_REDIRECT_URL=${self:custom.redirectUrl_live} REACT_APP_REGION=${self:custom.region} REACT_APP_S3_BUCKET=${self:custom.websiteDomain}=${self:custom.stage}-files npm run build
     errorDocument: index.html
     clientSrcPath: client
     apiPath: api
@@ -254,9 +255,9 @@ resources:
         RefreshTokenValidity: 3650
         SupportedIdentityProviders: 
           - COGNITO
-          #- Facebook
+          - Facebook
           - Google 
-         # - LoginWithAmazon
+          - LoginWithAmazon
         
       
   # Creates a federeated Identity pool
