@@ -36,7 +36,7 @@
   },
   "scripts": {
     "start": "concurrently --kill-others-on-fail  \"npm run server\" \"npm run client\" ",
-    "server": "sls offline --port 4000",
+    "server": "sls offline --skipCacheInvalidation --port 4000",
     "client": "cd client && npm start"
   },
   "devDependencies": {
