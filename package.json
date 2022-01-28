@@ -30,7 +30,7 @@
     "serverless-http": "^2.0.2",
     "serverless-offline": "^5.10.1",
     "serverless-secrets-plugin": "^0.1.0",
-    "simple-get": "^3.0.3",
+    "simple-get": "^4.0.1",
     "uuidv4": "^4.0.0",
     "validator": "^11.1.0"
   },
