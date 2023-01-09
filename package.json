@@ -28,7 +28,7 @@
     "request": "^2.88.0",
     "serverless-dynamodb-local": "^0.2.38",
     "serverless-http": "^2.0.2",
-    "serverless-offline": "^5.10.1",
+    "serverless-offline": "^12.0.4",
     "serverless-secrets-plugin": "^0.1.0",
     "simple-get": "^3.0.3",
     "uuidv4": "^4.0.0",
